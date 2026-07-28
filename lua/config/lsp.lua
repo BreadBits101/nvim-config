@@ -1,4 +1,5 @@
 local map = vim.keymap.set
+local platform = require("config.platform")
 
 -- Capabilities tell language servers what the client supports.
 local capabilities = require("blink.cmp").get_lsp_capabilities()
@@ -43,67 +44,82 @@ vim.lsp.config("eslint", {
     },
 })
 
-local jdtls_root = "C:/Tools/jdtls"
-local jdtls_launcher = vim.fn.glob(
-    jdtls_root .. "/plugins/org.eclipse.equinox.launcher_*.jar"
-)
+-- Set NVIM_JDTLS_HOME when jdtls is installed somewhere else.  The defaults
+-- match the documented local setup on each platform without embedding a user
+-- home directory in the shared configuration.
+local jdtls_root = vim.env.NVIM_JDTLS_HOME
+    or (platform.is_windows and "C:/Tools/jdtls" or vim.fn.expand("~/tools/jdtls"))
+local jdtls_launcher = vim.fn.glob(jdtls_root .. "/plugins/org.eclipse.equinox.launcher_*.jar")
+local jdtls_config = platform.is_windows and "config_win" or "config_mac"
 
-vim.lsp.config("jdtls", {
-    cmd = {
-        "java",
+local jdtls_enabled = (platform.is_windows or platform.is_mac)
+    and platform.executable("java")
+    and jdtls_launcher ~= ""
+    and vim.uv.fs_stat(jdtls_root .. "/" .. jdtls_config) ~= nil
 
-        "-Declipse.application=org.eclipse.jdt.ls.core.id1",
-        "-Dosgi.bundles.defaultStartLevel=4",
-        "-Declipse.product=org.eclipse.jdt.ls.core.product",
-        "-Dlog.protocol=true",
-        "-Dlog.level=ALL",
-        "-Xmx1g",
+if jdtls_enabled then
+    vim.lsp.config("jdtls", {
+        cmd = {
+            "java",
 
-        "--add-modules=ALL-SYSTEM",
-        "--add-opens",
-        "java.base/java.util=ALL-UNNAMED",
-        "--add-opens",
-        "java.base/java.lang=ALL-UNNAMED",
+            "-Declipse.application=org.eclipse.jdt.ls.core.id1",
+            "-Dosgi.bundles.defaultStartLevel=4",
+            "-Declipse.product=org.eclipse.jdt.ls.core.product",
+            "-Dlog.protocol=true",
+            "-Dlog.level=ALL",
+            "-Xmx1g",
 
-        "-jar",
-        jdtls_launcher,
+            "--add-modules=ALL-SYSTEM",
+            "--add-opens",
+            "java.base/java.util=ALL-UNNAMED",
+            "--add-opens",
+            "java.base/java.lang=ALL-UNNAMED",
 
-        "-configuration",
-        jdtls_root .. "/config_win",
+            "-jar",
+            jdtls_launcher,
 
-        "-data",
-        vim.fn.stdpath("cache")
-            .. "/jdtls/"
-            .. vim.fn.fnamemodify(vim.fn.getcwd(), ":t"),
-    },
+            "-configuration",
+            jdtls_root .. "/" .. jdtls_config,
 
-    filetypes = {
-        "java",
-    },
+            "-data",
+            vim.fn.stdpath("cache")
+                .. "/jdtls/"
+                .. vim.fn.fnamemodify(vim.fn.getcwd(), ":t"),
+        },
 
-    root_markers = {
-        "pom.xml",
-        "build.gradle",
-        "build.gradle.kts",
-        "settings.gradle",
-        "settings.gradle.kts",
-        "mvnw",
-        "gradlew",
-        ".git",
-    },
-})
+        filetypes = {
+            "java",
+        },
+
+        root_markers = {
+            "pom.xml",
+            "build.gradle",
+            "build.gradle.kts",
+            "settings.gradle",
+            "settings.gradle.kts",
+            "mvnw",
+            "gradlew",
+            ".git",
+        },
+    })
+end
 
 -- Enable installed servers.
-vim.lsp.enable({
+local servers = {
     "clangd",
-    "jdtls",
     "pyright",
     "ts_ls",
     "html",
     "cssls",
     "jsonls",
     "eslint",
-})
+}
+
+if jdtls_enabled then
+    table.insert(servers, "jdtls")
+end
+
+vim.lsp.enable(servers)
 
 -- Buffer-local mappings are created only when an LSP attaches.
 vim.api.nvim_create_autocmd("LspAttach", {
