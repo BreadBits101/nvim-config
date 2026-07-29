@@ -13,6 +13,7 @@ vim.lsp.config("*", {
 vim.lsp.config("clangd", {
     cmd = {
         "clangd",
+        "--compile-commands-dir=build-ninja",
         "--background-index",
         "--clang-tidy",
         "--completion-style=detailed",
