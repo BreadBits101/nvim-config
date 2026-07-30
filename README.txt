@@ -83,6 +83,7 @@ Core plugins:
 * fzf-lua         File/text/navigation search
 * nvim-web-devicons
 * gruvbox.nvim
+* VimTeX          LaTeX editing, continuous compilation, and PDF preview
 
 fzf-lua is intentionally lazy-loaded. In :Lazy it appearing under "Not Loaded"
 is normal, not an error. It loads when one of its mappings is used:
@@ -96,6 +97,23 @@ is normal, not an error. It loads when one of its mappings is used:
   <leader>fS  Workspace symbols
 
 The leader key is Space.
+
+
+LaTeX
+-----
+VimTeX uses latexmk to continuously compile LaTeX documents after they are
+saved. Install a TeX distribution that provides latexmk on each machine, then
+install a PDF viewer suited to the platform:
+
+* Windows: SumatraPDF on PATH provides an auto-reloading preview and SyncTeX
+  forward search.
+* macOS: Skim provides an auto-reloading preview and SyncTeX navigation. The
+  standard /Applications installation is detected automatically.
+
+Open a .tex file and press \ll to start continuous compilation. The viewer
+opens automatically; press \lv to forward-search from the cursor into the
+PDF, \le to open errors, and \lk to stop compilation. VimTeX passes
+-synctex=1 by default.
 
 
 Jupyter notebooks
