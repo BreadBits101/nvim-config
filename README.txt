@@ -3,7 +3,7 @@ NEOVIM CONFIGURATION HANDOFF
 
 Purpose
 -------
-This is a deliberately small, transparent Neovim setup for C, C++, Java,
+This is a deliberately small, transparent Neovim setup for C, C++, Rust, Java,
 Python, web development, and practical Jupyter-notebook editing. It is shared
 between Windows and macOS through Git.
 
@@ -33,7 +33,7 @@ Cross-platform requirements
 * Tools and language servers are installed independently on each device; Git
   synchronises only this configuration.
 * Keep executable names consistent on PATH where possible: git, rg, fd, fzf,
-  clang/clang++, clangd, cmake, ninja, java, Python, Node/npm, and relevant
+  clang/clang++, clangd, cmake, ninja, rust-analyzer, java, Python, Node/npm, and relevant
   language servers/formatters.
 * Windows config normally lives in %LOCALAPPDATA%\\nvim; macOS config normally
   lives in ~/.config/nvim.
@@ -73,6 +73,32 @@ If those conditions are not met, Java LSP is simply not enabled; the rest of
 Neovim should keep working.
 
 
+Rust
+----
+Install Rust with rustup on each machine. Use the default stable toolchain;
+rustup provides rustc (compiler) and cargo (build, run, and test). Install the
+rust-analyzer, rustfmt, and clippy components if they are not already present:
+
+  rustup component add rust-analyzer rustfmt clippy
+
+The rust-analyzer executable must be on PATH for the configured Rust LSP.
+On Windows, the default MSVC Rust target also needs the Visual Studio C++
+build tools and Windows SDK for linking. The rustup installer can offer to
+install these prerequisites. On macOS, install Xcode Command Line Tools.
+
+Inside a Cargo project, use :terminal cargo run, :terminal cargo test,
+:terminal cargo clippy, or :terminal cargo fmt from Neovim. These commands
+also work in any regular terminal. No separate Neovim build plugin is needed.
+
+
+TypeScript / JavaScript
+-----------------------
+The configured TypeScript LSP is the native server in TypeScript 7 or newer
+(`tsc --lsp`). Install TypeScript on each machine and make `tsc` available on
+PATH. The older `typescript-language-server` needs `tsserver.js`, which is not
+provided by TypeScript 7.
+
+
 Plugins and mappings
 --------------------
 Core plugins:
@@ -81,6 +107,7 @@ Core plugins:
 * nvim-lspconfig  Language-server configuration
 * blink.cmp       Completion
 * fzf-lua         File/text/navigation search
+* nvim-tree.lua   File explorer sidebar
 * nvim-web-devicons
 * gruvbox.nvim
 * VimTeX          LaTeX editing, continuous compilation, and PDF preview
@@ -95,6 +122,10 @@ is normal, not an error. It loads when one of its mappings is used:
   <leader>fr  Recent files
   <leader>fs  Document symbols
   <leader>fS  Workspace symbols
+
+Use <leader>ft to toggle the nvim-tree file explorer on the left, or
+<leader>fT to reveal the current file in it. Press g? inside the tree for
+its file and directory commands.
 
 The leader key is Space.
 

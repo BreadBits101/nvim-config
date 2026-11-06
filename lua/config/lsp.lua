@@ -33,10 +33,6 @@ vim.lsp.config("pyright", {
     },
 })
 
-vim.lsp.config("ts_ls", {
-    single_file_support = false,
-})
-
 vim.lsp.config("eslint", {
     settings = {
         workingDirectory = {
@@ -108,8 +104,9 @@ end
 -- Enable installed servers.
 local servers = {
     "clangd",
+    "rust_analyzer",
     "pyright",
-    "ts_ls",
+    "tsc",
     "html",
     "cssls",
     "jsonls",
